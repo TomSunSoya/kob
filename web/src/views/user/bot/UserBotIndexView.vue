@@ -20,7 +20,7 @@
 						<div class="modal-dialog modal-xl">
 							<div class="modal-content">
 								<div class="modal-header">
-									<h1 class="modal-title fs-5" id="exampleModalLabel">创建BOT</h1>
+									<h1 class="modal-title fs-5">创建BOT</h1>
 									<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 								</div>
 								<div class="modal-body">
@@ -34,7 +34,13 @@
 									</div>
 									<div class="mb-3">
 										<label for="add-bot-code" class="form- label">代码</label>
-										<textarea v-model="botadd.content" class="form-control" id="add-bot-code" rows="7" placeholder="请编写BOT代码"></textarea>
+										<VAceEditor
+											v-model:value="botadd.content"
+											@init="editorInit"
+											lang="c_cpp"
+											theme="textmate"
+											style="height: 300px"
+											:options="aceConfig.options" class="ace-editor" />
 									</div>
 								</div>
 								<div class="modal-footer">
@@ -62,7 +68,7 @@
 										<button type="button" class="btn btn-secondary" data-bs-toggle="modal" :data-bs-target="'#update-bot-modal-' + bot.id" style="margin-right: 10px;">修改</button>
 										<button type="button" class="btn btn-danger" @click="remove_bot(bot.id)">删除</button>
 										
-										<div class="modal fade" id="'update-bot-modal-' + bot.id" tabindex="-1">
+										<div class="modal fade" :id="'update-bot-modal-' + bot.id" tabindex="-1">
 											<div class="modal-dialog modal-xl">
 												<div class="modal-content">
 													<div class="modal-header">
@@ -71,21 +77,27 @@
 													</div>
 													<div class="modal-body">
 														<div class="mb-3">
-															<label for="add-bot-title" class="form-label">名称</label>
-															<input v-model="botadd.title" type="text" class=" form-control" id="add-bot-title" placeholder="请输入BOT名称">
+															<label for="add-bot-title" class="form-label" >名称</label>
+															<input v-model="bot.title" type="text" class=" form-control" id="add-bot-title" :placeholder="bot.title">
 														</div>
 														<div class="mb-3">
 															<label for="add-bot-description" class="form-label">简介</label>
-															<textarea v-model="botadd.description" class="form-control" id="add-bot-description" rows="3" placeholder="请输入BOT简介"></textarea>
+															<textarea v-model="bot.description" class="form-control" id="add-bot-description" rows="3" :placeholder="bot.description"></textarea>
 														</div>
 														<div class="mb-3">
 															<label for="add-bot-code" class="form- label">代码</label>
-															<textarea v-model="botadd.content" class="form-control" id="add-bot-code" rows="7" placeholder="请编写BOT代码"></textarea>
+															<VAceEditor
+																v-model:value="bot.content"
+																@init="editorInit"
+																lang="c_cpp"
+																theme="textmate"
+																style="height: 300px"
+																:options="aceConfig.options" class="ace-editor"  />
 														</div>
 													</div>
 													<div class="modal-footer">
-														<div class="error-message">{{ botadd.error_message }}</div>
-														<button type="button" class="btn btn-primary" @click="add_bot">创建</button>
+														<div class="error-message">{{ bot.error_message }}</div>
+														<button type="button" class="btn btn-primary" @click="update_bot(bot)">确认修改</button>
 														<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
 													</div>
 												</div>
@@ -107,9 +119,75 @@ import { ref, reactive } from 'vue';
 import { useStore } from 'vuex';
 import $ from 'jquery'
 import { Modal } from 'bootstrap/dist/js/bootstrap';
+import { VAceEditor } from 'vue3-ace-editor';
+import ace from 'ace-builds';
+import "ace-builds/webpack-resolver";
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-chrome';
+import 'ace-builds/src-noconflict/ext-language_tools';
 
 export default {
+	components: {
+		VAceEditor
+	},
 	setup() {
+		const aceConfig = reactive({
+			theme: 'chrome', //主题
+            arr: [
+                /*所有主题*/
+                "ambiance",
+                "chaos",
+                "chrome",
+                "clouds",
+                "clouds_midnight",
+                "cobalt",
+                "crimson_editor",
+                "dawn",
+                "dracula",
+                "dreamweaver",
+                "eclipse",
+                "github",
+                "gob",
+                "gruvbox",
+                "idle_fingers",
+                "iplastic",
+                "katzenmilch",
+                "kr_theme",
+                "kuroir",
+                "merbivore",
+                "merbivore_soft",
+                "monokai",
+                "mono_industrial",
+                "pastel_on_dark",
+                "solarized_dark",
+                "solarized_light",
+                "sqlserver",
+                "terminal",
+                "textmate",
+                "tomorrow",
+                "tomorrow_night",
+                "tomorrow_night_blue",
+                "tomorrow_night_bright",
+                "tomorrow_night_eighties",
+                "twilight",
+                "vibrant_ink",
+                "xcode",
+            ],
+            readOnly: false, //是否只读
+            options: {
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true,
+                tabSize: 2,
+                showPrintMargin: false,
+                fontSize: 16
+            }
+		});
+		ace.config.set(
+    		"basePath", 
+    		"https://cdn.jsdelivr.net/npm/ace-builds@" + require('ace-builds').version + "/src-noconflict/"
+		)
+
 		const store = useStore();
 		let bots = ref([]);
 		
@@ -168,20 +246,20 @@ export default {
 				type: "post",
 				data: {
 					bot_id: bot.id,
-					title: botadd.title,
-					description: botadd.description,
-					content: botadd.content,
+					title: bot.title,
+					description: bot.description,
+					content: bot.content,
 				},
 				headers: {
 					Authorization: "Bearer " + store.state.user.token,
 				},
 				success(resp) {
 					if (resp.error_message === "success") {
-						Modal.getInstance("#add-bot-btn").hide();
+						Modal.getInstance('#update-bot-modal-' + bot.id).hide();
 						refresh_bots();
 					}
 					else
-						botadd.error_message = resp.error_message;
+						bot.error_message = resp.error_message;
 				}
 			})
 		} 
@@ -210,6 +288,7 @@ export default {
 			add_bot,
 			update_bot,
 			remove_bot,
+			aceConfig,
 		}
 	}
 };
