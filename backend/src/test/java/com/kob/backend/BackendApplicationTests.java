@@ -10,9 +10,8 @@ class BackendApplicationTests {
 
 	@Test
 	void contextLoads() {
-		PasswordEncoder encoder = new BCryptPasswordEncoder();
-		System.out.println(encoder.encode("123456"));
-		System.out.println(encoder.encode("w3dq"));
+		int id = Integer.parseInt("  oaiwjd");
+		System.out.println(id);
 	}
 
 }
