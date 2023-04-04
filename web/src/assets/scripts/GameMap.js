@@ -3,11 +3,12 @@ import { Wall } from "./Wall";
 import { Snake } from "./Snake";
 
 export class GameMap extends AcGameObject {
-    constructor(ctx, parent) {
+    constructor(ctx, parent, store) {
         super();
 
         this.ctx = ctx;
         this.parent = parent;
+        this.store = store;
         this.L = 0;
 
         this.rows = 13;
@@ -34,82 +35,40 @@ export class GameMap extends AcGameObject {
         
     }
 
-    check_connectivity(g, sx, sy, tx, ty) {
-        if (sx == tx && sy == ty) return true;
-        g[sx][sy] = true;
-
-        let dx = [-1, 0, 1, 0], dy = [0, 1, 0, -1];
-        for (let i = 0; i < 4; i++) {
-            let x = sx + dx[i], y = sy + dy[i];
-            if (!g[x][y] && this.check_connectivity(g, x, y, tx, ty))
-                return true;
-        }
-        return false;
-    }
-
     create_walls() {
-        const g = [];
-        for (let r = 0; r < this.rows; r++) {
-            g[r] = [];
-            for (let c = 0; c < this.cols; c++) {
-                g[r][c] = false;
-            }
-        }
+        const g = this.store.state.pk.gamemap;
 
-        for (let r = 0; r < this.rows; r++)
-            g[r][0] = g[r][this.cols - 1] = true;
-
-        for (let c = 0; c < this.cols; c++)
-            g[0][c] = g[this.rows - 1][c] = true;
-
-        // create random walls
-        for (let i = 0; i < this.inner_walls_count / 2; i++) {
-            for (let j = 0; j < 1000; j++) {
-                let r = parseInt(Math.random() * this.rows);
-                let c = parseInt(Math.random() * this.cols);
-                if (g[r][c] || g[this.rows - 1 - r][this.cols - 1 - c]) continue;
-                if (r === this.rows - 2 && c == 1 || (r == 1 && c === this.cols - 2))
-                    continue;
-
-                g[r][c] = g[this.rows - 1 - r][this.cols - 1 - c] = true;
-                break;
-            }
-        }
-
-        const copy_g = JSON.parse(JSON.stringify(g));
-        if (!this.check_connectivity(copy_g, this.rows - 2, 1, 1, this.cols - 2)) return false;
-
-        for (let r = 0; r < this.rows; r++) {
-            for (let c = 0; c < this.cols; c++) {
+        for (let r = 0; r < this.rows; r++) 
+            for (let c = 0; c < this.cols; c++) 
                 if (g[r][c])
                     this.walls.push(new Wall(r, c, this));
-            }
-        }
+            
+        
         return true;
     }
 
     add_listening_events() {
         this.ctx.canvas.focus();
-
-        const [snake0, snake1] = this.snakes;
         this.ctx.canvas.addEventListener('keydown', e => {
+            let d = -1;
             switch (e.key) {
-                case 'w': snake0.set_direction(0); break;
-                case 'd': snake0.set_direction(1); break;
-                case 's': snake0.set_direction(2); break;
-                case 'a': snake0.set_direction(3); break;
-                case 'ArrowUp': snake1.set_direction(0); break;
-                case 'ArrowRight': snake1.set_direction(1); break;
-                case 'ArrowDown': snake1.set_direction(2); break;
-                case 'ArrowLeft': snake1.set_direction(3); break;
+                case 'w': d = 0; break;
+                case 'd': d = 1; break;
+                case 's': d = 2; break;
+                case 'a': d = 3; break;
+            }
+
+            if (d >= 0) {
+                this.store.state.pk.socket.send(JSON.stringify({
+                    event: "move",
+                    direction: d,
+                }))
             }
         });
     }
 
     start() {
-        for (let i = 0; i < 1000; ++i)
-            if (this.create_walls()) break;
-
+        this.create_walls();
         this.add_listening_events();
     }
 
