@@ -7,7 +7,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
@@ -21,10 +25,13 @@ public class MatchingPool extends Thread {
         MatchingPool.restTemplate = restTemplate;
     }
 
-    public void addPlayer(Integer userId, Integer rating) {
+    public void addPlayer(Integer userId, Integer rating, Integer botId) {
         lock.lock();
         try {
-            players.add(new Player(userId, rating, 0));
+            int i = 0;
+            while (i < players.size()) if (players.get(i++).getUserId().equals(userId)) break;
+            if (i == players.size())
+                players.add(new Player(userId, rating, botId,0));
         } finally {
             lock.unlock();
         }
@@ -62,6 +69,7 @@ public class MatchingPool extends Thread {
                     break;
                 }
             }
+            if (used[i]) break;
         }
 
         List<Player> newPlayers = new ArrayList<>();
@@ -81,7 +89,10 @@ public class MatchingPool extends Thread {
         System.out.println("send result: " + a + " " + b);
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("a_id", a.getUserId().toString());
+        data.add("a_bot_id", a.getBotId().toString());
+
         data.add("b_id", b.getUserId().toString());
+        data.add("b_bot_id", b.getBotId().toString());
         restTemplate.postForObject(startGameUrl, data, String.class);
     }
 
