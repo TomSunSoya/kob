@@ -91,8 +91,12 @@ public class WebSocketServer {
 
         if (users.get(a.getId()) != null)
             users.get(a.getId()).game = game;
+        else
+            System.out.println("HHH-a");
         if (users.get(b.getId()) != null)
             users.get(b.getId()).game = game;
+        else
+            System.out.println("HHH-b");
 
         JSONObject respGame = new JSONObject();
         respGame.put("a_id", game.getPlayerA().getId());

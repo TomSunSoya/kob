@@ -32,7 +32,7 @@ public class BotPool extends Thread {
 
     private void consume(Bot bot) {
         Consumer consumer = new Consumer();
-        consumer.startTimeout(2000, bot);
+        consumer.startTimeout(200, bot);
     }
 
     public void addBot(Integer userId, String botCode, String input) {
