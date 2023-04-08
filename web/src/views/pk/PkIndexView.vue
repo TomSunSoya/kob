@@ -45,7 +45,7 @@ export default {
 					});
 					setTimeout(() => {
 						store.commit("updateStatus", "playing");
-					}, 2000);
+					}, 200);
 					store.commit("updateGame", data.game);
 				} else if (data.event === "move") {
 					console.log(data);
@@ -56,14 +56,14 @@ export default {
 				} 
 				else if (data.event === "result") {
 					console.log(data);
-				// 	const game = store.state.pk.gameObject;
-				// 	const [snake0, snake1] = game.snakes;
+					const game = store.state.pk.gameObject;
+					const [snake0, snake1] = game.snakes;
 
-				// 	if (data.loser === "all" || data.loser === "A")
-				// 		snake0.status = "die";
+					if (data.loser === "all" || data.loser === "A")
+						snake0.status = "die";
 					
-				// 	if (data.loser == "all" || data.loser === "B")
-				// 		snake1.status = "die";
+					if (data.loser == "all" || data.loser === "B")
+						snake1.status = "die";
 
 					store.commit("updateLoser", data.loser);
 				}

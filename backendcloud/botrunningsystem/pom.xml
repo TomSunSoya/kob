@@ -47,6 +47,12 @@
             <version>1.18.26</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.kob.backend</groupId>
+            <artifactId>backend</artifactId>
+            <version>2.7.5</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
