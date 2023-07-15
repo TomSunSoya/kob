@@ -7,11 +7,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Component
@@ -56,7 +52,6 @@ public class MatchingPool extends Thread {
     }
 
     private void matchPlayers() {
-        System.out.println("match players " + players);
         boolean[] used = new boolean[players.size()];
         for (int i = 0; i < players.size(); ++i) {
             if (used[i]) continue;
@@ -86,7 +81,6 @@ public class MatchingPool extends Thread {
     }
 
     private void sendResult(Player a, Player b) {
-        System.out.println("send result: " + a + " " + b);
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("a_id", a.getUserId().toString());
         data.add("a_bot_id", a.getBotId().toString());

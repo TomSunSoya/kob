@@ -60,13 +60,11 @@ public class WebSocketServer {
             users.put(userId, this);
         else
             this.session.close();
-        System.out.println(users);
     }
 
     @OnClose
     public void onClose() {
         // 关闭链接
-        System.out.println("disconnected!");
         if (this.user != null) {
             users.remove(this.user.getId());
         }
@@ -91,12 +89,8 @@ public class WebSocketServer {
 
         if (users.get(a.getId()) != null)
             users.get(a.getId()).game = game;
-        else
-            System.out.println("HHH-a");
         if (users.get(b.getId()) != null)
             users.get(b.getId()).game = game;
-        else
-            System.out.println("HHH-b");
 
         JSONObject respGame = new JSONObject();
         respGame.put("a_id", game.getPlayerA().getId());
@@ -127,7 +121,6 @@ public class WebSocketServer {
             users.get(b.getId()).sendMessage(respB.toJSONString());
     }
     private void startMatching(Integer botId) {
-        System.out.println("start matching!!!");
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user_id", this.user.getId().toString());
         data.add("rating", this.user.getRating().toString());
@@ -136,7 +129,6 @@ public class WebSocketServer {
     }
 
     private void stopMatching() {
-        System.out.println("stop matching!!!");
         MultiValueMap<String, String> data = new LinkedMultiValueMap<>();
         data.add("user_id", this.user.getId().toString());
         restTemplate.postForObject(removePlayerUrl, data, String.class);
@@ -156,7 +148,6 @@ public class WebSocketServer {
     @OnMessage
     public void onMessage(String message, Session session) {
         // 从Client接收消息
-        System.out.println("receive message");
         JSONObject data = JSONObject.parseObject(message);
         String event = data.getString("event");
         if ("start-matching".equals(event))

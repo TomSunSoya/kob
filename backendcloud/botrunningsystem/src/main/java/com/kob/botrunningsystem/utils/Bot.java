@@ -1,14 +1,20 @@
 package com.kob.botrunningsystem.utils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
-public class Bot implements com.kob.botrunningsystem.utils.BotInterface {
-    private static class Cell {
-        public int x, y;
-        public Cell(int x, int y) {
-            this.x = x;
-            this.y = y;
+public class Bot implements java.util.function.Supplier<Integer> {
+    @Override
+    public Integer get() {
+        File file = new File("input.txt");
+        try {
+            Scanner in = new Scanner(file);
+            return nextMove(in.nextLine());
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -36,7 +42,6 @@ public class Bot implements com.kob.botrunningsystem.utils.BotInterface {
         }
         return res;
     }
-    @Override
     public Integer nextMove(String input) {
         String[] strs = input.split("#");
         int[][] g = new int[13][13];
@@ -63,5 +68,14 @@ public class Bot implements com.kob.botrunningsystem.utils.BotInterface {
         }
 
         return 0;
+    }
+
+    private static class Cell {
+        public int x, y;
+
+        public Cell(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 }

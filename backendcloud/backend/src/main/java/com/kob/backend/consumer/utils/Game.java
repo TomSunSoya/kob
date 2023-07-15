@@ -292,7 +292,6 @@ public class Game extends Thread {
             resp.put("event", "move");
             resp.put("a_direction", nextStepA);
             resp.put("b_direction", nextStepB);
-            System.out.println("a_dir" + nextStepA + "   b_dir" + nextStepB);
             sendAllMessage(resp.toJSONString());
             nextStepA = nextStepB = null;
         } finally {
